@@ -7,24 +7,26 @@ from pose_validator import roles, act_tags, directions, check_act, DEFAULT_POSIT
 positions = {}
 
 
-# Rodeo family (reverse cowgirl - A facing away)
+# Rodeo family (Reverse Cowgirl - A facing away from B)
 base_rodeo = {**DEFAULT_POSITION,
     "hips_aligned": True,
-    "A_can_reach_down": True,
+    "A_can_reach_down": False,           # A facing away → cannot reach B's front body
     "B_can_reach_up": True,
     "A_facing_away": True,
     "face_access": False,
-    "head_access_A_to_B": False,          # A cannot reach B's head/hair (facing away)
+    "head_access_A_to_B": False,
     "head_access_B_to_A": True,
     "neck_access_A_to_B": False,
     "neck_access_B_to_A": True,
-    "chest_access": False,
+    "chest_access": False,               # A cannot reach B's chest/breasts
     "butt_access_A_to_B": False,
-    "butt_access_B_to_A": True,           # B can easily spank A's butt
+    "butt_access_B_to_A": True,          # B can easily spank A's ass
     "rear_swing_access_A_to_B": False,
-    "rear_swing_access_B_to_A": True,     # needed for spanking from bottom
+    "rear_swing_access_B_to_A": True,
     "genital_access_A_to_B": True,
     "genital_access_B_to_A": True,
+    "actor_can_thrust_A": False,         # A is on top, not thrusting down
+    "actor_can_thrust_B": True,          # B is thrusting upward
     "oral_alignment": False,
     "chest_alignment": False
 }
