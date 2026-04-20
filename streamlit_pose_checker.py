@@ -7,8 +7,28 @@ from pose_validator import roles, act_tags, directions, check_act, DEFAULT_POSIT
 positions = {}
 
 
-# Rodeo family
-base_rodeo = {**DEFAULT_POSITION, "hips_aligned": True, "A_can_reach_down": True, "B_can_reach_up": True, "A_facing_away": True, "genital_access_A_to_B": True, "genital_access_B_to_A": True}
+# Rodeo family (reverse cowgirl - A facing away)
+base_rodeo = {**DEFAULT_POSITION,
+    "hips_aligned": True,
+    "A_can_reach_down": True,
+    "B_can_reach_up": True,
+    "A_facing_away": True,
+    "face_access": False,
+    "head_access_A_to_B": False,          # A cannot reach B's head/hair (facing away)
+    "head_access_B_to_A": True,
+    "neck_access_A_to_B": False,
+    "neck_access_B_to_A": True,
+    "chest_access": False,
+    "butt_access_A_to_B": False,
+    "butt_access_B_to_A": True,           # B can easily spank A's butt
+    "rear_swing_access_A_to_B": False,
+    "rear_swing_access_B_to_A": True,     # needed for spanking from bottom
+    "genital_access_A_to_B": True,
+    "genital_access_B_to_A": True,
+    "oral_alignment": False,
+    "chest_alignment": False
+}
+
 positions["Rodeo"] = base_rodeo
 positions["Lazy Rodeo"] = {**base_rodeo, "B_can_reach_up": False}
 positions["Lying Rodeo"] = {**base_rodeo, "B_can_reach_up": False}
