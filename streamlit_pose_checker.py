@@ -7,26 +7,26 @@ from pose_validator import roles, act_tags, directions, check_act, DEFAULT_POSIT
 positions = {}
 
 
-# Rodeo family (Reverse Cowgirl - A facing away from B)
+# Rodeo family (Reverse Cowgirl - A facing away, very strict)
 base_rodeo = {**DEFAULT_POSITION,
     "hips_aligned": True,
-    "A_can_reach_down": False,           # A facing away → cannot reach B's front body
-    "B_can_reach_up": True,
+    "A_can_reach_down": False,           # A facing away - cannot reach anything in front of B
+    "B_can_reach_up": False,             # B cannot reach up to A's front without sitting up
     "A_facing_away": True,
     "face_access": False,
     "head_access_A_to_B": False,
-    "head_access_B_to_A": True,
+    "head_access_B_to_A": False,
     "neck_access_A_to_B": False,
-    "neck_access_B_to_A": True,
-    "chest_access": False,               # A cannot reach B's chest/breasts
+    "neck_access_B_to_A": False,
+    "chest_access": False,               # No breast/nipple manual from either side
     "butt_access_A_to_B": False,
-    "butt_access_B_to_A": True,          # B can easily spank A's ass
+    "butt_access_B_to_A": True,          # Only realistic action: B spanking A's ass
     "rear_swing_access_A_to_B": False,
     "rear_swing_access_B_to_A": True,
     "genital_access_A_to_B": True,
-    "genital_access_B_to_A": True,
-    "actor_can_thrust_A": False,         # A is on top, not thrusting down
-    "actor_can_thrust_B": True,          # B is thrusting upward
+    "genital_access_B_to_A": False,      # Blocks handjob + vaginal fingering from B
+    "actor_can_thrust_A": False,
+    "actor_can_thrust_B": True,          # Only bottom can thrust upward
     "oral_alignment": False,
     "chest_alignment": False
 }
