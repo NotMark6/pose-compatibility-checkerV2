@@ -48,7 +48,7 @@ DEFAULT_POSITION: Dict[str, bool] = {
     "B_can_use_feet": False,
     "actor_can_thrust_A": False,
     "actor_can_thrust_B": False,
-    "bottom_can_perform_oral_chest": False,   # ← realism flag for all face-to-face poses
+    "bottom_can_perform_oral_chest": False,
 }
 
 # =========================
@@ -93,7 +93,7 @@ def role_labels(direction):
 
 
 # =========================
-# CHECK FUNCTION (now consistent across ALL poses)
+# CHECK FUNCTION (final version with strong oral breast block)
 # =========================
 def check_act(A, B, act_name, direction, current_position):
     actor, target = get_actor_target(A, B, direction)
@@ -112,27 +112,29 @@ def check_act(A, B, act_name, direction, current_position):
     if "target_needs_penis" in tags and not target.get("penis", False):
         return False, f"{target_label} has no penis"
 
-    # 2. POSITION CHECKS
+    # 2. STRONG BLOCK FOR ORAL BREAST ACTS (Manual Base + similar poses)
+    if act_name in ["Nipple Stimulation (Oral)", "Breast Sucking"]:
+        if not current_position.get("oral_alignment", False):
+            return False, f"{actor_label} cannot perform oral breast stimulation in this seated/manual position"
+
+    # 3. FACING-AWAY REALISM
+    if current_position.get("A_facing_away", False):
+        if act_name in ["Choking", "Hair Pulling", "Breast Stimulation (Manual)", 
+                        "Nipple Stimulation (Manual)", "Handjob", "Vaginal Fingering"]:
+            if direction == "A->B":
+                return False, f"{actor_label} cannot reach {target_label.lower()}'s front while facing away"
+            if direction == "B->A":
+                return False, f"{actor_label} cannot reach {target_label.lower()}'s front without sitting up"
+
+    # 4. POSITION CHECKS
     if "needs_face" in tags and not current_position.get("face_access", False):
         return False, "No face access in this position"
-    if "needs_oral_alignment" in tags and not current_position.get("oral_alignment", False):
-        return False, f"{actor_label} cannot perform this action due to body orientation"
-    if "needs_chest_alignment" in tags and not current_position.get("chest_alignment", False):
-        return False, f"{actor_label} cannot perform this action due to body alignment"
-    if "needs_rear_entry" in tags and not current_position.get("rear_entry_angle", False):
-        return False, f"{actor_label} cannot perform this action due to positioning angle"
     if "needs_rear_swing" in tags:
         key = f"rear_swing_access_{'A_to_B' if direction == 'A->B' else 'B_to_A'}"
         if not current_position.get(key, False):
             return False, f"{actor_label} cannot perform this action due to movement restriction"
 
-    # 3. REALISM: Oral chest actions (Nipple Stimulation (Oral) + Breast Sucking)
-    if act_name in ["Nipple Stimulation (Oral)", "Breast Sucking"]:
-        if direction == "B->A" and current_position.get("faces_aligned", False):
-            if not current_position.get("bottom_can_perform_oral_chest", False):
-                return False, f"{actor_label} cannot realistically reach {target_label.lower()}'s chest from the bottom in this pose"
-
-    # 4. REACH / HAND / FEET
+    # 5. REACH / HAND / FEET
     if ("needs_hand" in tags or "needs_free_hand" in tags):
         if direction == "A->B" and not current_position.get("A_can_reach_down", False):
             return False, f"{actor_label} cannot reach {target_label.lower()}"
@@ -144,13 +146,13 @@ def check_act(A, B, act_name, direction, current_position):
         if direction == "B->A" and not current_position.get("B_can_use_feet", False):
             return False, f"{actor_label} cannot use feet in this position"
 
-    # 5. CONTROL
+    # 6. CONTROL
     if "needs_actor_control" in tags:
         key = f"actor_can_thrust_{direction[0]}"
         if not current_position.get(key, False):
             return False, f"{actor_label} cannot control movement in this position"
 
-    # 6. SUCCESS
+    # 7. SUCCESS
     reason_map = {
         "Vaginal Penetration": f"{actor_label} has a penis and can reach {target_label.lower()}'s vagina",
         "Anal Penetration": f"{actor_label} has a penis and can reach {target_label.lower()}'s anus",

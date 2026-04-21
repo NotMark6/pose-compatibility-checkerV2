@@ -2,35 +2,21 @@ import streamlit as st
 from pose_validator import roles, act_tags, directions, check_act, DEFAULT_POSITION
 
 # =========================
-# POSITIONS (all safe with DEFAULT_POSITION)
+# POSITIONS (ALL FAMILIES)
 # =========================
 positions = {}
 
-
-# Rodeo family (Reverse Cowgirl - A facing away, very strict)
+# Rodeo family (Strict Reverse Cowgirl)
 base_rodeo = {**DEFAULT_POSITION,
-    "hips_aligned": True,
-    "A_can_reach_down": False,           # A facing away - cannot reach anything in front of B
-    "B_can_reach_up": False,             # B cannot reach up to A's front without sitting up
-    "A_facing_away": True,
-    "face_access": False,
-    "head_access_A_to_B": False,
-    "head_access_B_to_A": False,
-    "neck_access_A_to_B": False,
-    "neck_access_B_to_A": False,
-    "chest_access": False,               # No breast/nipple manual from either side
-    "butt_access_A_to_B": False,
-    "butt_access_B_to_A": True,          # Only realistic action: B spanking A's ass
-    "rear_swing_access_A_to_B": False,
-    "rear_swing_access_B_to_A": True,
-    "genital_access_A_to_B": True,
-    "genital_access_B_to_A": False,      # Blocks handjob + vaginal fingering from B
-    "actor_can_thrust_A": False,
-    "actor_can_thrust_B": True,          # Only bottom can thrust upward
-    "oral_alignment": False,
-    "chest_alignment": False
+    "hips_aligned": True, "A_can_reach_down": False, "B_can_reach_up": True, "A_facing_away": True,
+    "face_access": False, "head_access_A_to_B": False, "head_access_B_to_A": False,
+    "neck_access_A_to_B": False, "neck_access_B_to_A": False, "chest_access": False,
+    "butt_access_A_to_B": False, "butt_access_B_to_A": True,
+    "rear_swing_access_A_to_B": False, "rear_swing_access_B_to_A": True,
+    "genital_access_A_to_B": True, "genital_access_B_to_A": False,
+    "actor_can_thrust_A": False, "actor_can_thrust_B": True,
+    "oral_alignment": False, "chest_alignment": False
 }
-
 positions["Rodeo"] = base_rodeo
 positions["Lazy Rodeo"] = {**base_rodeo, "B_can_reach_up": False}
 positions["Lying Rodeo"] = {**base_rodeo, "B_can_reach_up": False}
@@ -92,16 +78,17 @@ positions["Lazy Lotus"] = {**base_lotus, "butt_access_A_to_B": False, "butt_acce
 positions["Mixed Lotus"] = {**base_lotus, "butt_access_A_to_B": False, "butt_access_B_to_A": True}
 positions["Wrapped Lotus"] = {**base_lotus, "butt_access_A_to_B": False, "butt_access_B_to_A": True}
 
-# Manual / Handjob family
+# Manual / Handjob family (no oral breast acts)
 base_manual = {**DEFAULT_POSITION,
     "faces_aligned": True, "hips_aligned": False,
     "A_can_reach_down": True, "B_can_reach_up": True,
     "A_facing_away": False,
     "neck_access_A_to_B": True, "neck_access_B_to_A": True,
     "head_access_A_to_B": True, "head_access_B_to_A": True,
-    "face_access": True, "chest_access": False,
+    "face_access": True, "chest_access": True,
     "butt_access_A_to_B": False, "butt_access_B_to_A": False,
-    "genital_access_A_to_B": True, "genital_access_B_to_A": True
+    "genital_access_A_to_B": True, "genital_access_B_to_A": True,
+    "oral_alignment": False, "chest_alignment": False
 }
 positions["Manual Base(Face-to-Face Seated Mutual)"] = base_manual
 positions["Head-to-Toe Mutual"] = {**base_manual, "B_can_reach_up": False}
@@ -317,7 +304,7 @@ positions["Driver's Open Lap Dance"] = {**DEFAULT_POSITION,
 positions["Driver's Road Head"] = {**positions["Driver's Open Lap Dance"], "genital_access_B_to_A": True}
 
 # =========================
-# UI
+# CLEAN UI WITH CHECKBOX + VALID + INVALID DROPDOWNS
 # =========================
 st.title("Pose Compatibility Checker")
 
@@ -325,15 +312,60 @@ role_A = st.selectbox("Role A", list(roles.keys()))
 role_B = st.selectbox("Role B", list(roles.keys()))
 pose = st.selectbox("Position", list(positions.keys()))
 
+hide_universal = st.checkbox("Hide universal actions (Scratching, etc.)", value=True)
+
 if st.button("Generate"):
-    current_position = positions[pose]          # ← this is the correct safe way
+    current_position = positions[pose]
     A = roles[role_A]
     B = roles[role_B]
 
-    st.subheader(f"{role_A} (A) + {role_B} (B)")
+    st.subheader(f"{role_A} (A) + {role_B} (B) — {pose}")
+
+    valid_actions = []
+    invalid_actions = []
 
     for act in act_tags:
         for direction in directions:
             result, reason = check_act(A, B, act, direction, current_position)
+            label = f"({direction.replace('->', '→')}) {act}"
             if result:
-                st.write(f"**({direction.replace('->','→')}) {act}** — {reason}")
+                valid_actions.append((label, reason))
+            else:
+                invalid_actions.append((label, reason))
+
+    # Valid actions dropdown
+    if valid_actions:
+        st.success(f"✅ {len(valid_actions)} possible actions")
+        selected = st.selectbox(
+            "Select a valid action to see details",
+            [label for label, _ in valid_actions]
+        )
+        for label, reason in valid_actions:
+            if label == selected:
+                st.write(f"**{label}**")
+                st.write(reason)
+                break
+    else:
+        st.info("No valid actions for this combination.")
+
+    # Invalid actions dropdown
+    if invalid_actions:
+        with st.expander(f"❌ Show all invalid actions ({len(invalid_actions)})"):
+            selected_invalid = st.selectbox(
+                "Select an invalid action to see why it failed",
+                [label for label, _ in invalid_actions]
+            )
+            for label, reason in invalid_actions:
+                if label == selected_invalid:
+                    st.write(f"**{label}**")
+                    st.write(reason)
+                    break
+
+    # Full raw list
+    with st.expander("Show full raw list (everything)"):
+        st.write("**Valid Actions:**")
+        for label, reason in valid_actions:
+            st.write(f"**{label}** — {reason}")
+        st.write("**Invalid Actions:**")
+        for label, reason in invalid_actions:
+            st.write(f"**{label}** — {reason}")
